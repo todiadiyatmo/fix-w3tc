@@ -37,7 +37,7 @@ class W3_PgCacheAdminEnvironment {
         $this->fix_folders($config, $exs);
 
         if ($config->get_boolean('config.check') || $force_all_checks) {
-            if ($config->get_boolean('pgcache.enabled') && 
+            if ($config->get_boolean('pgcache.enabled') &&
                     $config->get_string('pgcache.engine') == 'file_generic') {
                 $this->rules_core_add($config, $exs);
                 $this->rules_cache_add($config, $exs);
@@ -50,7 +50,7 @@ class W3_PgCacheAdminEnvironment {
         // if no errors so far - check if rewrite actually works
         if (count($exs->exceptions()) <= 0) {
             try {
-                if ($config->get_boolean('pgcache.enabled') && 
+                if ($config->get_boolean('pgcache.enabled') &&
                         $config->get_string('pgcache.engine') == 'file_generic') {
                     $this->verify_file_generic_compatibility();
 
@@ -76,17 +76,17 @@ class W3_PgCacheAdminEnvironment {
      **/
     public function fix_on_event($config, $event, $old_config = null) {
         // Schedules events
-        if ($config->get_boolean('pgcache.enabled') && 
-                ($config->get_string('pgcache.engine') == 'file' || 
+        if ($config->get_boolean('pgcache.enabled') &&
+                ($config->get_string('pgcache.engine') == 'file' ||
                     $config->get_string('pgcache.engine') == 'file_generic')) {
-            if ($old_config != null && 
-                    $config->get_integer('pgcache.file.gc') != 
+            if ($old_config != null &&
+                    $config->get_integer('pgcache.file.gc') !=
                     $old_config->get_integer('pgcache.file.gc')) {
                 $this->unschedule_gc();
             }
 
             if (!wp_next_scheduled('w3_pgcache_cleanup')) {
-                wp_schedule_event(time(), 
+                wp_schedule_event(time(),
                     'w3_pgcache_cleanup', 'w3_pgcache_cleanup');
             }
         } else {
@@ -94,16 +94,16 @@ class W3_PgCacheAdminEnvironment {
         }
 
         // Schedule prime event
-        if ($config->get_boolean('pgcache.enabled') && 
+        if ($config->get_boolean('pgcache.enabled') &&
                 $config->get_boolean('pgcache.prime.enabled')) {
-            if ($old_config != null && 
-                    $config->get_integer('pgcache.prime.interval') != 
+            if ($old_config != null &&
+                    $config->get_integer('pgcache.prime.interval') !=
                     $old_config->get_integer('pgcache.prime.interval')) {
                 $this->unschedule_prime();
             }
-            
+
             if (!wp_next_scheduled('w3_pgcache_prime')) {
-                wp_schedule_event(time(), 
+                wp_schedule_event(time(),
                     'w3_pgcache_prime', 'w3_pgcache_prime');
             }
         } else {
@@ -123,7 +123,7 @@ class W3_PgCacheAdminEnvironment {
         } catch (FilesystemOperationException $ex) {
             $exs->push($ex);
         }
-    
+
         $this->rules_core_remove($exs);
         $this->rules_cache_remove($exs);
 
@@ -148,7 +148,7 @@ class W3_PgCacheAdminEnvironment {
         $rewrite_rules = array();
         $pgcache_rules_core_path = w3_get_pgcache_rules_core_path();
         $rewrite_rules[] = array(
-            'filename' => $pgcache_rules_core_path, 
+            'filename' => $pgcache_rules_core_path,
             'content' => $this->rules_core_generate($config),
             'last' => true
         );
@@ -215,19 +215,19 @@ class W3_PgCacheAdminEnvironment {
 
             $home_url = w3_get_home_url();
 
-            $tech_message = 
+            $tech_message =
                 (w3_is_nginx() ? 'nginx configuration file' : '.htaccess file') .
-                ' contains rules to rewrite url ' . 
+                ' contains rules to rewrite url ' .
                 $home_url . '/w3tc_rewrite_test into ' .
                 $home_url . '/?w3tc_rewrite_test which, if handled by ' .
                 'plugin, return "OK" message.<br/>';
-            $tech_message .= 'The plugin made a request to ' . 
-                $home_url . '/w3tc_rewrite_test but received: <br />' . 
+            $tech_message .= 'The plugin made a request to ' .
+                $home_url . '/w3tc_rewrite_test but received: <br />' .
                 $result . '<br />';
             $tech_message .= 'instead of "OK" response. <br />';
 
             $error = '<strong>W3 Total Cache error:</strong> ' .
-                'It appears Page Cache ' . 
+                'It appears Page Cache ' .
                 '<acronym title="Uniform Resource Locator">URL</acronym> ' .
                 'rewriting is not working. ';
             if (w3_is_preview_mode()) {
@@ -240,14 +240,14 @@ class W3_PgCacheAdminEnvironment {
                 '(and that you have reloaded / restarted nginx).';
             } else {
                 $error .= 'Please verify that the server configuration ' .
-                'allows .htaccess'; 
+                'allows .htaccess';
             }
 
             $error .= '<br />Unfortunately disk enhanced page caching will ' .
                 'not function without custom rewrite rules. ' .
                 'Please ask your server administrator for assistance. ' .
-                'Also refer to <a href="' . 
-                admin_url('admin.php?page=w3tc_install') . 
+                'Also refer to <a href="' .
+                admin_url('admin.php?page=w3tc_install') .
                 '">the install page</a>  for the rules for your server.';
 
             throw new SelfTestFailedException($error, $tech_message);
@@ -269,7 +269,7 @@ class W3_PgCacheAdminEnvironment {
             $response = w3_http_get($url);
 
             $result = (!is_wp_error($response) && $response['response']['code'] == 200 && trim($response['body']) == 'OK');
-            
+
             if ($result) {
                 set_transient($key, $result, 30);
             } else {
@@ -314,12 +314,12 @@ class W3_PgCacheAdminEnvironment {
         $config_data = @file_get_contents($config_path);
         if ($config_data === false)
             return;
-        
+
         $new_config_data = $this->wp_config_remove_from_content($config_data);
         $new_config_data = preg_replace(
-            '~<\?(php)?~', 
-            "\\0\r\n" . $this->wp_config_addon(), 
-            $new_config_data, 
+            '~<\?(php)?~',
+            "\\0\r\n" . $this->wp_config_addon(),
+            $new_config_data,
             1);
 
         if ($new_config_data != $config_data) {
@@ -328,8 +328,8 @@ class W3_PgCacheAdminEnvironment {
             } catch (FilesystemOperationException $ex) {
                 throw new FilesystemModifyException(
                     $ex->getMessage(), $ex->credentials_form(),
-                    'Edit file <strong>' . $config_path . 
-                    '</strong> and add next lines:', $config_path, 
+                    'Edit file <strong>' . $config_path .
+                    '</strong> and add next lines:', $config_path,
                     $this->wp_config_addon());
             }
         }
@@ -347,7 +347,7 @@ class W3_PgCacheAdminEnvironment {
         $config_data = @file_get_contents($config_path);
         if ($config_data === false)
             return;
-        
+
         $new_config_data = $this->wp_config_remove_from_content($config_data);
         if ($new_config_data != $config_data) {
             try {
@@ -355,8 +355,8 @@ class W3_PgCacheAdminEnvironment {
             } catch (FilesystemOperationException $ex) {
                 throw new FilesystemModifyException(
                     $ex->getMessage(), $ex->credentials_form(),
-                    'Edit file <strong>' . $config_path . 
-                    '</strong> and remove next lines:', 
+                    'Edit file <strong>' . $config_path .
+                    '</strong> and remove next lines:',
                     $config_path,  $this->wp_config_addon());
             }
         }
@@ -380,10 +380,10 @@ class W3_PgCacheAdminEnvironment {
      */
     private function wp_config_remove_from_content($config_data) {
         $config_data = preg_replace(
-            "~\\/\\*\\* Enable W3 Total Cache \\*\\*?\\/.*?\\/\\/ Added by W3 Total Cache(\r\n)*~s", 
+            "~\\/\\*\\* Enable W3 Total Cache \\*\\*?\\/.*?\\/\\/ Added by W3 Total Cache(\r\n)*~s",
             '', $config_data);
         $config_data = preg_replace(
-            "~(\\/\\/\\s*)?define\\s*\\(\\s*['\"]?WP_CACHE['\"]?\\s*,.*?\\)\\s*;+\\r?\\n?~is", 
+            "~(\\/\\/\\s*)?define\\s*\\(\\s*['\"]?WP_CACHE['\"]?\\s*,.*?\\)\\s*;+\\r?\\n?~is",
             '', $config_data);
 
         return $config_data;
@@ -423,7 +423,7 @@ class W3_PgCacheAdminEnvironment {
         $rules = $this->rules_core_generate($config);
         $rules_missing = (strstr(w3_clean_rules($data), w3_clean_rules($rules)) === false);
 
-        
+
         if (!$has_legacy && !$has_wpsc && !$rules_missing)
             return; // modification of file not required
 
@@ -432,7 +432,7 @@ class W3_PgCacheAdminEnvironment {
         $replace_end = strpos($data, W3TC_MARKER_END_PGCACHE_CORE);
 
         if ($replace_start !== false && $replace_end !== false && $replace_start < $replace_end) {
-            $replace_length = $replace_end - $replace_start + 
+            $replace_length = $replace_end - $replace_start +
                 strlen(W3TC_MARKER_END_PGCACHE_CORE) + 1;
         } else {
             $replace_start = false;
@@ -441,13 +441,13 @@ class W3_PgCacheAdminEnvironment {
             $search = array(
                 W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
                 W3TC_MARKER_BEGIN_WORDPRESS => 0,
-                W3TC_MARKER_END_MINIFY_CORE => 
+                W3TC_MARKER_END_MINIFY_CORE =>
                     strlen(W3TC_MARKER_END_MINIFY_CORE) + 1,
-                W3TC_MARKER_END_BROWSERCACHE_CACHE => 
+                W3TC_MARKER_END_BROWSERCACHE_CACHE =>
                     strlen(W3TC_MARKER_END_BROWSERCACHE_CACHE) + 1,
-                W3TC_MARKER_END_PGCACHE_CACHE => 
+                W3TC_MARKER_END_PGCACHE_CACHE =>
                     strlen(W3TC_MARKER_END_PGCACHE_CACHE) + 1,
-                W3TC_MARKER_END_MINIFY_CACHE => 
+                W3TC_MARKER_END_MINIFY_CACHE =>
                     strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
             );
 
@@ -462,7 +462,7 @@ class W3_PgCacheAdminEnvironment {
         }
 
         if ($replace_start !== false) {
-            $data = w3_trim_rules(substr_replace($data, $rules, 
+            $data = w3_trim_rules(substr_replace($data, $rules,
                 $replace_start, $replace_length));
         } else {
             $data = w3_trim_rules($data . $rules);
@@ -831,7 +831,7 @@ class W3_PgCacheAdminEnvironment {
          */
         $reject_cookies = array_merge($reject_cookies, $config->get_array('pgcache.reject.cookie'));
         w3_array_trim($reject_cookies);
-        
+
         $reject_user_agents = $config->get_array('pgcache.reject.ua');
         if ($config->get_boolean('pgcache.compatibility')) {
             $reject_user_agents = array_merge(array(W3TC_POWERED_BY), $reject_user_agents);
@@ -960,10 +960,11 @@ class W3_PgCacheAdminEnvironment {
         /**
          * Check for preview cookie
          */
+        $rules .= "set \$w3tc_rewrite_preview \"\";\n";
         $rules .= "if (\$http_cookie ~* \"(w3tc_preview)\") {\n";
-        $rules .= "    set \$w3tc_rewrite _preview;\n";
+        $rules .= "    set \$w3tc_rewrite_preview _preview;\n";
         $rules .= "}\n";
-        $env_w3tc_preview = "\$w3tc_rewrite";
+        $env_w3tc_preview = "\$w3tc_rewrite_preview";
 
         /**
          * Check referrer groups
