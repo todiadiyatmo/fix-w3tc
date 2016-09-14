@@ -139,7 +139,7 @@ class W3_PgCache {
             $request_host = substr($request_host, 0, $pos);
         $this->_request_host = $request_host;
         $this->_request_uri = $_SERVER['REQUEST_URI'];
-        $this->_lifetime = apply_filters('w3tc_pgcache_lifetime', $this->_config->get_integer('pgcache.lifetime'));
+        $this->_lifetime = apply_filters('w3tc_pgcache_lifetime', $this->_request_uri, $this->_config->get_integer('pgcache.lifetime'));
         $this->_late_init = $this->_config->get_boolean('pgcache.late_init');
         $this->_enhanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_generic');
 
