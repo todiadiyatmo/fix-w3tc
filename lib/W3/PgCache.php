@@ -149,7 +149,7 @@ class W3_PgCache {
 	 * @param string  $_request_uri The URI of the page.
 	 * @param integer $_lifetime    The page cache lifetime.
 	 */
-        $this->_lifetime = apply_filters('w3tc_pgcache_lifetime', $this->_request_uri, $this->_lifetime);
+        $this->_lifetime = apply_filters('w3tc_pgcache_lifetime', $this->_lifetime, $this->_request_uri);
         
         $this->_late_init = $this->_config->get_boolean('pgcache.late_init');
         $this->_enhanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_generic');
