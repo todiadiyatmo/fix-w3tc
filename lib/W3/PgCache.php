@@ -292,6 +292,7 @@ class W3_PgCache {
          * Send headers
          */
         $this->_send_headers($is_404, $time, $etag, $compression, $headers);
+        header( 'X-Cache-Status: hit' ); // It's a hit!
         if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'HEAD')
             return;
 
@@ -1474,18 +1475,6 @@ class W3_PgCache {
         }
     }
 
-    function alterPageLifetime(){
-      /**
-      * Filters the current theme page cache lifetime. Only work with Redis / Memcached
-      *
-      * @since 0.9.4.5
-      *
-      * @param string  $_request_uri The URI of the page.
-      * @param integer $_lifetime    The page cache lifetime.
-      */
-      $this->_lifetime = apply_filters('w3tc_pgcache_lifetime', $this->_lifetime, $this->_request_uri);
-    }
-
     /**
      * @param $buffer
      * @param $has_dynamic
@@ -1577,7 +1566,7 @@ class W3_PgCache {
          * Send headers
          */
         $this->_send_headers($is_404, $time, $etag, $compression, $headers);
-
+        header( 'X-Cache-Status: hit' ); // It's a hit!
         if ($raw) {
             if ($this->_debug && w3_can_print_comment($buffer)) {
                 $buffer = $this->_debugging_caching($buffer, $mobile_group, $referrer_group, $encryption,
@@ -1647,4 +1636,17 @@ class W3_PgCache {
         $buffer .= "\r\n\r\n" . $debug_info;
         return $buffer;
     }
+
+    /**
+     * Filters the current theme page cache lifetime.
+     *
+     * @since 0.9.4.5
+     *
+     * @param string  $_request_uri The URI of the page.
+     * @param integer $_lifetime    The page cache lifetime.
+     */
+     function alterPageLifetime() {
+       $this->_lifetime = apply_filters('w3tc_pgcache_lifetime', $this->_lifetime, $this->_request_uri);
+     }
+
 }
