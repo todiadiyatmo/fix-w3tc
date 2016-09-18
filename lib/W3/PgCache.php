@@ -1566,7 +1566,6 @@ class W3_PgCache {
          * Send headers
          */
         $this->_send_headers($is_404, $time, $etag, $compression, $headers);
-        header( 'X-Cache-Status: hit' ); // It's a hit!
         if ($raw) {
             if ($this->_debug && w3_can_print_comment($buffer)) {
                 $buffer = $this->_debugging_caching($buffer, $mobile_group, $referrer_group, $encryption,
